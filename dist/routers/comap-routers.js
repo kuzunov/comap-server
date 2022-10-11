@@ -1,0 +1,20 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.placesRouter = exports.reviewsRouter = exports.commentsRouter = exports.organizationsRouter = exports.usersRouter = exports.eventsRouter = void 0;
+const validationSchemas_1 = require("../utils/validationSchemas");
+const custom_router_1 = require("./custom-router");
+const modifyChildRouter_1 = require("./modifyChildRouter");
+const childCommentsRouter = (0, custom_router_1.default)(process.env.DB_FOLDER + process.env.COMMENTS_DB, 'comment', true);
+(0, modifyChildRouter_1.default)(childCommentsRouter, process.env.DB_FOLDER + process.env.COMMENTS_DB, validationSchemas_1.commentValidationSchema);
+const childReviewsRouter = (0, custom_router_1.default)(process.env.DB_FILES + process.env.COMMENTS_DB, 'review', true);
+(0, modifyChildRouter_1.default)(childReviewsRouter, process.env.DB_FOLDER + process.env.COMMENTS_DB, validationSchemas_1.reviewValidationSchema);
+exports.eventsRouter = (0, custom_router_1.default)(process.env.DB_FOLDER + process.env.EVENTS_DB, 'event', false, validationSchemas_1.eventValidationSchema);
+exports.eventsRouter.use('/:parentid/comments', childCommentsRouter);
+exports.usersRouter = (0, custom_router_1.default)(process.env.DB_FOLDER + process.env.USERS_DB, 'user', false, validationSchemas_1.userValidationsSchema);
+exports.usersRouter.use('/:parentid/comments', childCommentsRouter);
+exports.organizationsRouter = (0, custom_router_1.default)(process.env.DB_FOLDER + process.env.ORGANIZATIONS_DB, 'organization', false, validationSchemas_1.organizationValidationSchema);
+exports.organizationsRouter.use('/:parentid/comments', childCommentsRouter);
+exports.commentsRouter = (0, custom_router_1.default)(process.env.DB_FOLDER + process.env.COMMENTS_DB, 'comment');
+exports.reviewsRouter = (0, custom_router_1.default)(process.env.DB_FOLDER + process.env.REVIEWS_DB, 'review');
+exports.placesRouter = (0, custom_router_1.default)(process.env.DB_FOLDER + process.env.PLACES_DB, 'place');
+//# sourceMappingURL=comap-routers.js.map
