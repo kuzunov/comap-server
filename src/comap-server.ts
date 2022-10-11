@@ -18,7 +18,7 @@ import { IPlace } from './model/place';
 import { ChildRepositoryImpl } from './dao/child-entity-repository';
 import { UsersRepositoryImpl } from './dao/users-repository';
 import { sendErrorResponse } from './utils/utils';
-import { AuthenticationError, InvalidDataError } from './model/errors';
+import { AuthenticationError, ForbiddenError, InvalidDataError } from './model/errors';
 import { request } from 'http';
 import { NotFoundError } from 'rxjs';
 
@@ -69,11 +69,16 @@ app.use('/api/auth', authRouter);
 app.use(function (err, req, res, next) {
     let status= 500;
     console.error(err.stack)
-    if (err instanceof AuthenticationError) status = 401
-    else if (err instanceof NotFoundError) status = 404
-    else if (err instanceof InvalidDataError) status = 400
-    sendErrorResponse(req, res, err.status||status, `Server error: ${err.message}`, err);
-})
+    if(err instanceof AuthenticationError) {
+        status = 401;
+    } else if(err instanceof ForbiddenError) {
+        status = 403;
+    } else if(err instanceof NotFoundError) {
+        status = 404;
+    } else if(err instanceof InvalidDataError) {
+        status = 400;
+    } 
+    sendErrorResponse(req, res, err.status || status, `Error: ${err.message}`, err);})
     })
     
 })();
