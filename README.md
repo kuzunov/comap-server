@@ -16,7 +16,7 @@ HOSTNAME = your-hostname
 PORT = a-port-that-the-app-will-listen-on
 DB_URL = a-db-url
 DB_NAME = name-of-db
-JWT_SECRET_KEY= a-security-key-to-sign-jwt-with
+JWT_SECRET_KEY= a-secret-key-to-sign-jwt-with
 ```
 
 ## Main technologies
