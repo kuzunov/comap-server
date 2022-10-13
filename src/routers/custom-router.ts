@@ -39,9 +39,12 @@ const customRouter:customRouterType = <T>(entityName,childRouter=false,validatio
             sendErrorResponse(req, res, 500, `Server error: ${err.message}`,err);
         }
     })
-    .post('/',[verifyToken,verifyRole([USER_ROLE.USER,USER_ROLE.ORGANIZATOR,USER_ROLE.USER],)],async (req,res,next)=> {
+    .post('/',[verifyToken,verifyRole([USER_ROLE.ORGANIZATOR,USER_ROLE.ADMIN],)],async (req,res,next)=> {
         if(childRouter) {return next()}
         const entity = req.body;
+        entity.created = Date.now();
+        entity.modified = Date.now();
+
         try{
             await indicative.validator.validate(entity,validationSchema.entity);
             try {
@@ -57,7 +60,7 @@ const customRouter:customRouterType = <T>(entityName,childRouter=false,validatio
             next(new InvalidDataError( `Invalid ${entityName} data: ${err.message}`));
         }
     })
-    .put('/',[verifyToken,verifyRole([USER_ROLE.USER,USER_ROLE.ORGANIZATOR,USER_ROLE.USER])], async (req, res,next)=> {
+    .put('/',[verifyToken,verifyRole([USER_ROLE.USER,USER_ROLE.ORGANIZATOR,USER_ROLE.ADMIN])], async (req, res,next)=> {
         const entity = req.body;
         try {
             await indicative.validator.validate(entity,validationSchema.entity);
@@ -74,7 +77,7 @@ const customRouter:customRouterType = <T>(entityName,childRouter=false,validatio
             next(new InvalidDataError( `Invalid ${entityName} data: ${err.message}`));
         }
     })
-    .delete('/',[verifyToken,verifyRole([USER_ROLE.USER,USER_ROLE.ORGANIZATOR])], async (req,res,next) => {
+    .delete('/',[verifyToken,verifyRole([USER_ROLE.USER,USER_ROLE.ORGANIZATOR,USER_ROLE.ADMIN])], async (req,res,next) => {
         const entity = req.body;
         try {
             await indicative.validator.validate(entity,validationSchema.entityToDelete)

@@ -45,12 +45,13 @@ export class RepositoryImpl<T extends Identifiable<IdType>> implements IReposito
             throw new NotFoundError(`ID="${entity.id} does not exist and can not be modified.`);
         }
         entity.modified = Date.now();
+
         replaceIdWith_id(entity);
         var myquery = { _id: new ObjectId(entity._id) };
+        delete entity._id;
         var newvalues = { $set: entity };
         const updateRes = await this.db.collection(this.collection)
             .updateOne(myquery, newvalues);
-        // console.log(updateRes);
         if (updateRes.acknowledged && updateRes.modifiedCount === 1) {
             console.log(`Successfully updated: ${JSON.stringify(entity)}`);
             return entity;

@@ -153,6 +153,7 @@ export const userValidationsSchema = new validationSchema({
 export const commentValidationSchema = new validationSchema( {
     body:'required|string|min:2|max:512',
     authorId: 'required',
+    parentId:'required',
     created:"number",
     modified:"number",
 });

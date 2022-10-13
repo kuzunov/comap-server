@@ -20,6 +20,8 @@ const modifyChildRouter = (router:express.Router,entityName,validationSchema:{id
     .post('/',[verifyToken],async (req:express.Request<{parentid:string,childid:string}>,res)=> {
         const entity:ChildEntity<IdType> = req.body;
         try{
+            entity.created = Date.now();
+            entity.modified = Date.now();
             await indicative.validator.validate(entity,validationSchema.entity)
             const params = req.params;
             await indicative.validator.validate(params, validationSchema.id);

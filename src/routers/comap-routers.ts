@@ -17,7 +17,7 @@ modifyChildRouter(childReviewsRouter,'review',reviewValidationSchema);
 
 
 export const eventsRouter = customRouter<IEvent>('event',false,eventValidationSchema);
-eventsRouter.use('/:parentid/comments',childCommentsRouter );
+eventsRouter.use('/:parentid/comments',childCommentsRouter);
 
 export const usersRouter = customRouter<IUser>('user',false,userValidationsSchema)
 usersRouter.use('/:parentid/comments',childCommentsRouter )

@@ -24,6 +24,7 @@ export function replace_IdWithId<T extends Identifiable<IdType>>(entity:WithId<T
 export function replaceIdWith_id<T extends Identifiable<IdType>>(entity:T):WithId<T> {
     const id = entity.id;
     delete entity.id;
-    return Object.assign({}, entity, { _id: id }) as unknown as WithId<T>;
+    entity._id = id;
+    return Object.assign({}, entity) as unknown as WithId<T>;
 
 }
