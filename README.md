@@ -23,4 +23,4 @@ JWT_SECRET_KEY= a-secret-key-to-sign-jwt-with
 
 ### [Node.js](https://nodejs.org/en/)
 ### [Express](https://expressjs.com/)
-### [MongoDB] (https://www.mongodb.com/)
+### [MongoDB](https://www.mongodb.com/)
