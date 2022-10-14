@@ -1,3 +1,4 @@
+import { existsSync } from "fs";
 import { OptionalUnlessRequiredId } from "mongodb";
 import { AppError, NotFoundError } from "../model/errors";
 import { IUser } from "../model/user";
@@ -8,9 +9,12 @@ export class UsersRepositoryImpl extends RepositoryImpl<IUser> {
     async findByUsername(username:string):Promise<IUser>{
         try{
             const user = await this.db.collection<IUser>(this.collection).findOne({username});
-            return user ? replace_IdWithId(user): undefined;
+            if(!user) {
+                throw new NotFoundError(`User with ${username} does not exist.`)
+            }
+            return replace_IdWithId(user) ;
         }catch(err) {
-            throw new NotFoundError(`User with ${username} not found.`)
+            throw new AppError(500, `Error in DB`)
         }
     }
     async create(entity: IUser): Promise<IUser> {

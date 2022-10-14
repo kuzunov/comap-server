@@ -61,7 +61,7 @@ export class RepositoryImpl<T extends Identifiable<IdType>> implements IReposito
     async deleteById(id: string): Promise<T> {
         const found = await this.findById(id);
         if (!found) {
-            throw new AppError(404, `ID="${id} does not exist and can't be modified.`);
+            throw new NotFoundError(`ID="${id} does not exist and can't be modified.`);
         }
         const res = await this.db.collection(this.collection).deleteOne({_id: new ObjectId(id)});
         if (res.acknowledged && res.deletedCount === 1) {

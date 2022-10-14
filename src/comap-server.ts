@@ -7,7 +7,7 @@ dotenv.config();
 import { MongoClient } from 'mongodb';
 
 
-import { authRouter, commentsRouter, eventsRouter, organizationsRouter, placesRouter, reviewsRouter, usersRouter } from './routers/comap-routers';
+import { authRouter, commentsRouter, dashboardRouter, eventsRouter, organizationsRouter, placesRouter, reviewsRouter, usersRouter } from './routers/comap-routers';
 import { RepositoryImpl } from './dao/repository';
 import { IEvent } from './model/event';
 import { IUser } from './model/user';
@@ -30,6 +30,7 @@ app.use(cors())
 app.use(logger('dev'));
 app.use(express.json({limit: '10mb'}));
 
+app.use('/api/dashboard', dashboardRouter);
 app.use('/api/events',eventsRouter);
 
 app.use('/api/users', usersRouter);

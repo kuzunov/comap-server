@@ -7,6 +7,7 @@ import { IUser } from "../model/user";
 import { commentValidationSchema, eventValidationSchema, organizationValidationSchema, reviewValidationSchema, userValidationsSchema } from "../model/validationSchemas";
 import { AuthRouter } from "./auth-router";
 import customRouter from "./custom-router";
+import { DashboardRouter } from "./dashboard-router";
 import modifyChildRouter from "./modifyChildRouter";
 // import { EventsRepository, CommentsRepository, OrganizationsRepository, PlacesRepository, ReviewsRepository, UsersRepository } from "../dao/repository";
 
@@ -29,3 +30,4 @@ export const commentsRouter = customRouter<IComment>('comment');
 export const reviewsRouter =  customRouter<IReview>('review');
 export const placesRouter = customRouter<IPlace>('place');
 export const authRouter = AuthRouter();
+export const dashboardRouter = DashboardRouter();
