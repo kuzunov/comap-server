@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Guest = exports.USER_ROLE = exports.USER_STATUS = void 0;
 ;
+;
 var USER_STATUS;
 (function (USER_STATUS) {
     USER_STATUS[USER_STATUS["ACTIVE"] = 1] = "ACTIVE";
@@ -25,7 +26,7 @@ exports.Guest = {
     status: USER_STATUS.ACTIVE,
     avatar: "",
     description: "",
-    registered: 0,
+    created: 0,
     modified: 0,
     role: USER_ROLE.GUEST,
 };

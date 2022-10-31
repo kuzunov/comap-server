@@ -12,44 +12,50 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const utils_1 = require("../utils/utils");
 const indicative = require("indicative");
-const uuid_1 = require("uuid");
-const customRouter = (dbFile, entityName, childRouter = false, validationSchema) => {
+const verify_jwt_1 = require("../utils/verify-jwt");
+const errors_1 = require("../model/errors");
+const verify_role_1 = require("../utils/verify-role");
+const user_1 = require("../model/user");
+const customRouter = (entityName, childRouter = false, validationSchema) => {
     const router = (childRouter) ? express.Router({ mergeParams: true }) : express.Router();
-    router.get('/', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    router
+        .get('/', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         if (childRouter) {
             return next();
         }
         try {
-            const entities = yield (0, utils_1.getJsonFromFile)(dbFile);
+            const entities = yield req.app.locals[entityName.charAt(0).toUpperCase() + entityName.slice(1) + "sRepository"].findAll();
             res.json(entities);
         }
         catch (err) {
             (0, utils_1.sendErrorResponse)(req, res, 500, `Server error: ${err.message}`, err);
         }
-    })).get('/:parentid', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    }))
+        .get((childRouter) ? '/:childid' : '/:parentid', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const params = req.params;
-            yield indicative.validator.validate(params, { parentid: validationSchema.id });
-            const entities = yield (0, utils_1.getJsonFromFile)(dbFile);
-            const entity = entities.find(entity => entity.id === params.parentid);
+            const idToCheck = (childRouter) ? params.childid : params.parentid;
+            yield indicative.validator.validate(idToCheck, (childRouter) ? validationSchema.childEntity : validationSchema.id);
+            const entity = yield req.app.locals[entityName.charAt(0).toUpperCase() + entityName.slice(1) + "sRepository"].findById(idToCheck);
             (entity) ? res.json(entity) : (0, utils_1.sendErrorResponse)(req, res, 404, `Entity ${params.parentid} not found`, new Error());
         }
         catch (err) {
             (0, utils_1.sendErrorResponse)(req, res, 500, `Server error: ${err.message}`, err);
         }
-    })).post('/', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    }))
+        .post('/', [verify_jwt_1.verifyToken, (0, verify_role_1.default)([user_1.USER_ROLE.ORGANIZATOR, user_1.USER_ROLE.ADMIN])], (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         if (childRouter) {
             return next();
         }
         const entity = req.body;
+        entity.created = Date.now();
+        entity.modified = Date.now();
         try {
             yield indicative.validator.validate(entity, validationSchema.entity);
-            const entities = yield (0, utils_1.getJsonFromFile)(dbFile);
-            entity.id = (0, uuid_1.v4)();
-            entities.push(entity);
             try {
-                (0, utils_1.writeJsonToFile)(dbFile, entities);
-                res.json(entity);
+                console.log(entityName.charAt(0).toUpperCase() + entityName.slice(1) + "sRepository");
+                const returnEntity = yield req.app.locals[entityName.charAt(0).toUpperCase() + entityName.slice(1) + "sRepository"].create(entity);
+                res.status(201).json(returnEntity);
             }
             catch (err) {
                 console.error(`Unable to create ${entityName}: ${entity.id}.`);
@@ -58,17 +64,17 @@ const customRouter = (dbFile, entityName, childRouter = false, validationSchema)
             }
         }
         catch (err) {
-            (0, utils_1.sendErrorResponse)(req, res, 400, `Invalid ${entityName} data: ${err.message}`, err);
+            next(new errors_1.InvalidDataError(`Invalid ${entityName} data: ${err.message}`));
         }
-    })).put('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    }))
+        .put('/', [verify_jwt_1.verifyToken, (0, verify_role_1.default)([user_1.USER_ROLE.USER, user_1.USER_ROLE.ORGANIZATOR, user_1.USER_ROLE.ADMIN])], (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const entity = req.body;
         try {
             yield indicative.validator.validate(entity, validationSchema.entity);
-            const entities = yield (0, utils_1.getJsonFromFile)(dbFile);
-            entities.splice(entities.findIndex(dbEntity => dbEntity.id === entity.id), 1, entity);
             try {
-                (0, utils_1.writeJsonToFile)(dbFile, entities);
-                res.json(entity);
+                //check user id in url and req.body, check if user body and old user id is the same
+                const entityToReturn = yield req.app.locals[entityName.charAt(0).toUpperCase() + entityName.slice(1) + "sRepository"].update(entity);
+                res.json(entityToReturn);
             }
             catch (err) {
                 console.error(`Unable to update ${entityName}: ${entity.id}.`);
@@ -77,18 +83,15 @@ const customRouter = (dbFile, entityName, childRouter = false, validationSchema)
             }
         }
         catch (err) {
-            (0, utils_1.sendErrorResponse)(req, res, 400, `Invalid ${entityName} data: ${err.message}`, err);
+            next(new errors_1.InvalidDataError(`Invalid ${entityName} data: ${err.message}`));
         }
-    })).delete('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    }))
+        .delete('/', [verify_jwt_1.verifyToken, (0, verify_role_1.default)([user_1.USER_ROLE.USER, user_1.USER_ROLE.ORGANIZATOR, user_1.USER_ROLE.ADMIN])], (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const entity = req.body;
         try {
             yield indicative.validator.validate(entity, validationSchema.entityToDelete);
-            const entities = yield (0, utils_1.getJsonFromFile)(dbFile);
-            const indexToDelete = entities.findIndex(dbEntity => dbEntity.id === entity.id);
-            const deletedEntity = entities[indexToDelete];
-            entities.splice(indexToDelete, 1);
             try {
-                (0, utils_1.writeJsonToFile)(dbFile, entities);
+                const deletedEntity = yield req.app.locals[entityName.charAt(0).toUpperCase() + entityName.slice(1) + "sRepository"].deleteById(entity.id);
                 res.json(deletedEntity);
             }
             catch (err) {
@@ -98,7 +101,7 @@ const customRouter = (dbFile, entityName, childRouter = false, validationSchema)
             }
         }
         catch (err) {
-            (0, utils_1.sendErrorResponse)(req, res, 400, `Invalid ${entityName} data: ${err.message}`, err);
+            next(new errors_1.InvalidDataError(`Invalid ${entityName} data: ${err.message}`));
         }
     }));
     return router;

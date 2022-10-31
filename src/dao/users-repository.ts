@@ -10,7 +10,7 @@ export class UsersRepositoryImpl extends RepositoryImpl<IUser> {
         try{
             const user = await this.db.collection<IUser>(this.collection).findOne({username});
             if(!user) {
-                throw new NotFoundError(`User with ${username} does not exist.`)
+                return null;
             }
             return replace_IdWithId(user) ;
         }catch(err) {

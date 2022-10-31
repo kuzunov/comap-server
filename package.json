@@ -37,6 +37,7 @@
     "tsc": "tsc -w",
     "start": "nodemon -w ./src",
     "build": "tsc",
-    "nodemon": "nodemon"
+    "nodemon": "nodemon",
+    "debug": "nodemon -w ./dist --inspect"
   }
 }
